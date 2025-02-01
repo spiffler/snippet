@@ -11,7 +11,6 @@ wiki_wiki = wikipediaapi.Wikipedia(
     user_agent="snippet (anonymous@example.com)"
 )
 
-
 # Store seen articles to prevent repeats
 if "seen_articles" not in st.session_state:
     st.session_state.seen_articles = set()
@@ -58,37 +57,49 @@ def get_random_paragraph():
         return get_random_wikipedia_page() + ("Source: Wikipedia",)
 
     elif selected_source == "trivia":
-        response = requests.get("https://uselessfacts.jsph.pl/random.json?language=en")
-        if response.status_code == 200:
-            fact = response.json().get("text", "No fact found.")
-            return "Random Fact", fact, "Source: Useless Facts API"
+        try:
+            response = requests.get("https://uselessfacts.jsph.pl/random.json?language=en")
+            if response.status_code == 200:
+                fact = response.json().get("text", "No fact found.")
+                return "Random Fact", fact, "Source: Useless Facts API"
+        except requests.exceptions.RequestException:
+            pass  # Skip if there's an issue with this API
 
     elif selected_source == "quote":
-        response = requests.get("https://api.quotable.io/random")
-        if response.status_code == 200:
-            data = response.json()
-            quote = f'"{data.get("content", "No quote found.")}" - {data.get("author", "Unknown")}'
-            return "Inspiration", quote, "Source: Quotable API"
+        try:
+            response = requests.get("https://zenquotes.io/api/random")
+            if response.status_code == 200:
+                data = response.json()
+                quote = f'"{data[0]["q"]}" - {data[0]["a"]}'
+                return "Inspiration", quote, "Source: ZenQuotes API"
+        except requests.exceptions.RequestException:
+            pass  # Skip if there's an issue with this API
 
     elif selected_source == "joke":
-        response = requests.get("https://v2.jokeapi.dev/joke/Any")
-        if response.status_code == 200:
-            data = response.json()
-            if "joke" in data:  
-                return "Random Joke", data["joke"], "Source: JokeAPI"
-            elif "setup" in data and "delivery" in data:  
-                return "Random Joke", f'{data["setup"]}\n\n{data["delivery"]}', "Source: JokeAPI"
+        try:
+            response = requests.get("https://v2.jokeapi.dev/joke/Any")
+            if response.status_code == 200:
+                data = response.json()
+                if "joke" in data:  
+                    return "Random Joke", data["joke"], "Source: JokeAPI"
+                elif "setup" in data and "delivery" in data:  
+                    return "Random Joke", f'{data["setup"]}\n\n{data["delivery"]}', "Source: JokeAPI"
+        except requests.exceptions.RequestException:
+            pass  # Skip if there's an issue with this API
 
     elif selected_source == "poetry":
-        response = requests.get("https://poetrydb.org/random")
-        if response.status_code == 200:
-            poems = response.json()
-            if poems and isinstance(poems, list):
-                poem = poems[0]
-                title = poem.get("title", "Untitled")
-                author = poem.get("author", "Unknown")
-                lines = "\n".join(poem.get("lines", []))  # Show full poem
-                return title, f"{lines}\n\n— {author}", "Source: PoetryDB API"
+        try:
+            response = requests.get("https://poetrydb.org/random")
+            if response.status_code == 200:
+                poems = response.json()
+                if poems and isinstance(poems, list):
+                    poem = poems[0]
+                    title = poem.get("title", "Untitled")
+                    author = poem.get("author", "Unknown")
+                    lines = "\n".join(poem.get("lines", []))  # Show full poem
+                    return title, f"{lines}\n\n— {author}", "Source: PoetryDB API"
+        except requests.exceptions.RequestException:
+            pass  # Skip if there's an issue with this API
 
     # Fallback to Wikipedia if nothing else works
     return get_random_wikipedia_page() + ("Source: Wikipedia",)
@@ -98,7 +109,7 @@ st.title("📖 Snippet!")
 
 # Get a Wikipedia article based on the selected topic
 if "current_title" not in st.session_state:
-    st.session_state.current_title, st.session_state.current_paragraph = get_random_wikipedia_page()
+    st.session_state.current_title, st.session_state.current_paragraph, st.session_state.current_source = get_random_paragraph()
 
 st.subheader(st.session_state.current_title)
 st.write(st.session_state.current_paragraph)
