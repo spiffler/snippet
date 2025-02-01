@@ -7,7 +7,10 @@ import random
 OPENAI_API_KEY = "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"
 
 # Initialize Wikipedia API
-wiki_wiki = wikipediaapi.Wikipedia('en')
+wiki_wiki = wikipediaapi.Wikipedia(
+    language="en",
+    extract_format=wikipediaapi.ExtractFormat.WIKI
+)
 
 def get_random_wikipedia_page():
     """Fetches a random Wikipedia page title and its first paragraph."""
