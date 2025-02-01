@@ -14,8 +14,19 @@ wiki_wiki = wikipediaapi.Wikipedia(
 TOPIC_CATEGORIES = ["Random", "Sports", "Economics", "Science", "History", "Technology", "Art", "Politics", "Medicine"]
 
 def get_wikipedia_article(topic):
-    """Fetches a Wikipedia article based on the selected topic or a random one if 'Random' is chosen."""
+    """Fetches a Wikipedia article from a broader category instead of strict search terms."""
     
+    # Mapping each topic to a relevant Wikipedia category
+    CATEGORY_MAPPING = {
+        "Sports": "Category:Sports",
+        "Economics": "Category:Economics",
+        "Science": "Category:Science",
+        "History": "Category:History",
+        "Technology": "Category:Technology",
+        "Art": "Category:Art",
+        "Politics": "Category:Politics"
+    }
+
     if topic == "Random":
         # Get a truly random Wikipedia article
         random_url = "https://en.wikipedia.org/wiki/Special:Random"
@@ -23,18 +34,26 @@ def get_wikipedia_article(topic):
         if response.status_code == 200:
             article_title = response.url.split("/wiki/")[-1]
     else:
-        # Search Wikipedia for articles related to the selected topic
-        search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={topic}&format=json"
-        search_response = requests.get(search_url).json()
-        search_results = search_response.get("query", {}).get("search", [])
+        # Fetch articles from the broader category
+        category_name = CATEGORY_MAPPING.get(topic, None)  # No default fallback
+        if not category_name:
+            return "No category found.", ""
 
-        if not search_results:
-            return "No articles found for this topic.", ""
+        category_page = wiki_wiki.page(category_name)
 
-        # Pick a random article from the search results
-        article_title = search_results[random.randint(0, len(search_results) - 1)]["title"]
-    
-    # Get Wikipedia page
+        if category_page.exists():
+            subpages = category_page.categorymembers
+            article_titles = [title for title in subpages if ":" not in title]  # Ignore subcategories
+
+            if not article_titles:
+                return "No articles found for this topic.", ""
+
+            # Pick a truly random article from the category
+            article_title = random.choice(article_titles)
+        else:
+            return "No category found.", ""
+
+    # Fetch Wikipedia page
     page = wiki_wiki.page(article_title)
 
     if page.exists():
@@ -42,7 +61,7 @@ def get_wikipedia_article(topic):
         paragraphs = page.text.split("\n")
         selected_paragraphs = [p for p in paragraphs if p.strip()]
         
-        return page.title, "\n\n".join(selected_paragraphs[:3])  # First two paragraphs
+        return page.title, "\n\n".join(selected_paragraphs[:2])  # First two paragraphs
 
     return "No content found.", ""
 
