@@ -103,6 +103,10 @@ if "current_title" not in st.session_state:
 st.subheader(st.session_state.current_title)
 st.write(st.session_state.current_paragraph)
 
+# Display the source with a smaller font
+if "current_source" in st.session_state:
+    st.markdown(f"<p style='font-size:12px; color:gray;'>📌 {st.session_state.current_source}</p>", unsafe_allow_html=True)
+
 # Buttons for user actions
 col1, col2 = st.columns(2)
 
