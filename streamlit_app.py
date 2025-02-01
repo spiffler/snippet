@@ -33,9 +33,11 @@ def get_ai_insights(paragraph):
 
     response = openai.ChatCompletion.create(
         model="gpt-4",
-        messages=[{"role": "system", "content": "You are a helpful assistant."},
-                  {"role": "user", "content": prompt}]
-    )
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
+    ).choices[0].message["content"]
 
     return response["choices"][0]["message"]["content"]
 
