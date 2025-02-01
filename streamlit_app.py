@@ -44,7 +44,7 @@ def get_ai_insights(paragraph):
     return response.choices[0].message.content  # Corrected response format
 
 # Streamlit UI
-st.title("📖 Random Paragraph Explorer")
+st.title("📖 Snippet!")
 
 # Get a random Wikipedia paragraph
 if "current_paragraph" not in st.session_state:
