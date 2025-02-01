@@ -138,43 +138,12 @@ st.write(st.session_state.current_paragraph)
 if "current_source" in st.session_state:
     st.markdown(f"<p style='font-size:12px; color:gray;'>📌 {st.session_state.current_source}</p>", unsafe_allow_html=True)
 
-# Buttons for user actions
-col1, col2 = st.columns(2)
+# Create a centered column layout
+col1, col2, col3 = st.columns([1, 2, 1])
 
-with col1:
-    if st.button("🔄 Next"):
+with col2:  # Center the button
+    if st.button("🔄 Next", use_container_width=True):
         st.session_state.current_title, st.session_state.current_paragraph, st.session_state.current_source = get_random_paragraph()
         st.rerun()
 
 
-# Let users toggle button position for better mobile UX
-if "button_side" not in st.session_state:
-    st.session_state.button_side = "right"  # Default is right-handed
-
-toggle_side = st.toggle("Switch Button Side (for mobile)", value=(st.session_state.button_side == "left"))
-st.session_state.button_side = "left" if toggle_side else "right"
-
-# Improve mobile tap accessibility with adaptive positioning
-st.markdown(
-    f"""
-    <style>
-    @media (max-width: 768px) {{
-        div.stButton button {{
-            position: fixed;
-            bottom: 20px;
-            {"left: 20px;" if st.session_state.button_side == "left" else "right: 20px;"}
-            font-size: 18px;
-            padding: 12px 24px;
-        }}
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-col1, col2, col3 = st.columns([2, 1, 2])  # Centered on desktop
-
-with col2:  # Centered for desktop, dynamic for mobile
-    if st.button("➡️ Next", use_container_width=True):
-        st.session_state.current_title, st.session_state.current_paragraph, st.session_state.current_source = get_random_paragraph()
-        st.rerun()
