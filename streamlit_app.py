@@ -50,7 +50,7 @@ def get_random_wikipedia_page():
 def get_random_paragraph():
     """Fetches a truly random paragraph from Wikipedia, Trivia APIs, or Quote/Joke/Poetry APIs."""
     
-    sources = ["wikipedia", "trivia", "quote", "joke", "poetry"]
+    sources = ["wikipedia", "trivia", "sports_trivia", "entertainment_trivia", "quote", "joke", "poetry"]
     selected_source = random.choice(sources)
 
     if selected_source == "wikipedia":
@@ -63,7 +63,27 @@ def get_random_paragraph():
                 fact = response.json().get("text", "No fact found.")
                 return "Random Fact", fact, "Source: Useless Facts API"
         except requests.exceptions.RequestException:
-            pass  # Skip if there's an issue with this API
+            pass
+
+    elif selected_source == "sports_trivia":
+        try:
+            response = requests.get("https://opentdb.com/api.php?amount=1&category=21&type=multiple")
+            if response.status_code == 200:
+                data = response.json().get("results", [{}])[0]
+                question = data.get("question", "No trivia found.")
+                return "Sports Trivia", question, "Source: OpenTDB Sports API"
+        except requests.exceptions.RequestException:
+            pass
+
+    elif selected_source == "entertainment_trivia":
+        try:
+            response = requests.get("https://opentdb.com/api.php?amount=1&category=11&type=multiple")
+            if response.status_code == 200:
+                data = response.json().get("results", [{}])[0]
+                question = data.get("question", "No trivia found.")
+                return "Entertainment Trivia", question, "Source: OpenTDB Entertainment API"
+        except requests.exceptions.RequestException:
+            pass
 
     elif selected_source == "quote":
         try:
@@ -73,7 +93,7 @@ def get_random_paragraph():
                 quote = f'"{data[0]["q"]}" - {data[0]["a"]}'
                 return "Inspiration", quote, "Source: ZenQuotes API"
         except requests.exceptions.RequestException:
-            pass  # Skip if there's an issue with this API
+            pass
 
     elif selected_source == "joke":
         try:
@@ -85,7 +105,7 @@ def get_random_paragraph():
                 elif "setup" in data and "delivery" in data:  
                     return "Random Joke", f'{data["setup"]}\n\n{data["delivery"]}', "Source: JokeAPI"
         except requests.exceptions.RequestException:
-            pass  # Skip if there's an issue with this API
+            pass
 
     elif selected_source == "poetry":
         try:
@@ -99,7 +119,7 @@ def get_random_paragraph():
                     lines = "\n".join(poem.get("lines", []))  # Show full poem
                     return title, f"{lines}\n\n— {author}", "Source: PoetryDB API"
         except requests.exceptions.RequestException:
-            pass  # Skip if there's an issue with this API
+            pass
 
     # Fallback to Wikipedia if nothing else works
     return get_random_wikipedia_page() + ("Source: Wikipedia",)
@@ -123,5 +143,38 @@ col1, col2 = st.columns(2)
 
 with col1:
     if st.button("🔄 Next"):
+        st.session_state.current_title, st.session_state.current_paragraph, st.session_state.current_source = get_random_paragraph()
+        st.rerun()
+
+
+# Let users toggle button position for better mobile UX
+if "button_side" not in st.session_state:
+    st.session_state.button_side = "right"  # Default is right-handed
+
+toggle_side = st.toggle("Switch Button Side (for mobile)", value=(st.session_state.button_side == "left"))
+st.session_state.button_side = "left" if toggle_side else "right"
+
+# Improve mobile tap accessibility with adaptive positioning
+st.markdown(
+    f"""
+    <style>
+    @media (max-width: 768px) {{
+        div.stButton button {{
+            position: fixed;
+            bottom: 20px;
+            {"left: 20px;" if st.session_state.button_side == "left" else "right: 20px;"}
+            font-size: 18px;
+            padding: 12px 24px;
+        }}
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+col1, col2, col3 = st.columns([2, 1, 2])  # Centered on desktop
+
+with col2:  # Centered for desktop, dynamic for mobile
+    if st.button("➡️ Next", use_container_width=True):
         st.session_state.current_title, st.session_state.current_paragraph, st.session_state.current_source = get_random_paragraph()
         st.rerun()
