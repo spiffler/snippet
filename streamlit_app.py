@@ -3,6 +3,7 @@ import wikipediaapi
 import openai
 import random
 import os
+import requests
 
 # OpenAI API Key (store in an environment variable instead for security)
 #OPENAI_API_KEY = "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"
