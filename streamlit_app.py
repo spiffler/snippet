@@ -2,10 +2,10 @@ import streamlit as st
 import wikipediaapi
 import openai
 import random
+import os
 
 # OpenAI API Key (store in an environment variable instead for security)
-OPENAI_API_KEY = "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"
-
+#OPENAI_API_KEY = "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"
 # Initialize Wikipedia API
 wiki_wiki = wikipediaapi.Wikipedia(
     language="en",
@@ -26,22 +26,23 @@ def get_random_wikipedia_page():
         return page.title, page.summary.split(".")[0] + "."  # First sentence only
     return None, None
 
-import openai
-
 def get_ai_insights(paragraph):
-    """Uses OpenAI API (new syntax) to provide more context on the paragraph."""
-    client = openai.OpenAI(api_key=OPENAI_API_KEY)  # Use new OpenAI client
-    prompt = f"Explain this paragraph in more detail: {paragraph}"
+    """Uses OpenAI API to provide more context on the paragraph."""
+    
+    client = openai.OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        organization="org-DdMb01W8dCtzx7RX4429W3iF"  # Replace with your OpenAI Org ID
+    )
 
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": f"Explain this paragraph in detail: {paragraph}"}
         ]
     )
 
-    return response.choices[0].message.content  # Corrected response format
+    return response.choices[0].message.content
 
 # Streamlit UI
 st.title("📖 Snippet!")
