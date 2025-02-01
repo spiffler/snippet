@@ -26,20 +26,22 @@ def get_random_wikipedia_page():
         return page.title, page.summary.split(".")[0] + "."  # First sentence only
     return None, None
 
+import openai
+
 def get_ai_insights(paragraph):
-    """Uses OpenAI to provide more context on the paragraph."""
-    openai.api_key = OPENAI_API_KEY
+    """Uses OpenAI API (new syntax) to provide more context on the paragraph."""
+    client = openai.OpenAI(api_key=OPENAI_API_KEY)  # Use new OpenAI client
     prompt = f"Explain this paragraph in more detail: {paragraph}"
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
         ]
-    ).choices[0].message["content"]
+    )
 
-    return response["choices"][0]["message"]["content"]
+    return response.choices[0].message.content  # Corrected response format
 
 # Streamlit UI
 st.title("📖 Random Paragraph Explorer")
