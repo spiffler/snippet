@@ -50,7 +50,8 @@ def get_random_wikipedia_page():
 def get_random_paragraph():
     """Fetches a truly random paragraph from Wikipedia, Trivia APIs, or Quote/Joke/Poetry APIs."""
     
-    sources = ["wikipedia", "trivia", "sports_trivia", "entertainment_trivia", "quote", "joke", "poetry"]
+    sources = ["wikipedia", "trivia", "sports_trivia", "entertainment_trivia", 
+               "quote", "joke", "poetry", "news", "history", "reddit", "science"]
     selected_source = random.choice(sources)
 
     if selected_source == "wikipedia":
@@ -119,6 +120,47 @@ def get_random_paragraph():
                     lines = "\n".join(poem.get("lines", []))  # Show full poem
                     return title, f"{lines}\n\n— {author}", "Source: PoetryDB API"
         except requests.exceptions.RequestException:
+            pass
+
+    elif selected_source == "news":
+        try:
+            response = requests.get("https://newsapi.org/v2/top-headlines?country=us&apiKey=YOUR_NEWSAPI_KEY")
+            if response.status_code == 200:
+                article = response.json()["articles"][0]
+                title = article["title"]
+                content = article["description"] or article["content"]
+                return title, content, f"Source: {article['source']['name']}"
+        except:
+            pass
+
+    elif selected_source == "history":
+        try:
+            response = requests.get("https://history.muffinlabs.com/date")
+            if response.status_code == 200:
+                data = response.json()["data"]["Events"]
+                event = random.choice(data)
+                return f"On This Day: {event['year']}", event['text'], "Source: Today in History API"
+        except:
+            pass
+
+    elif selected_source == "reddit":
+        try:
+            headers = {"User-Agent": "Mozilla/5.0"}
+            response = requests.get("https://www.reddit.com/r/todayilearned/top.json?limit=5", headers=headers)
+            if response.status_code == 200:
+                posts = response.json()["data"]["children"]
+                post = random.choice(posts)["data"]
+                return f"TIL: {post['title']}", post['selftext'], "Source: Reddit r/todayilearned"
+        except:
+            pass
+
+    elif selected_source == "science":
+        try:
+            response = requests.get("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY")
+            if response.status_code == 200:
+                data = response.json()
+                return f"NASA Astronomy Picture of the Day", data["explanation"], "Source: NASA API"
+        except:
             pass
 
     # Fallback to Wikipedia if nothing else works
