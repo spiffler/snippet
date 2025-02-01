@@ -9,7 +9,8 @@ OPENAI_API_KEY = "sk-proj-mlLO9sy0Ryzs7r1eJYeRFY1UcYjmnOzr9pns4y7mngiIES-yUYGc8N
 # Initialize Wikipedia API
 wiki_wiki = wikipediaapi.Wikipedia(
     language="en",
-    extract_format=wikipediaapi.ExtractFormat.WIKI
+    extract_format=wikipediaapi.ExtractFormat.WIKI,
+    user_agent="snippet (anonymous@example.com)"
 )
 
 def get_random_wikipedia_page():
