@@ -55,7 +55,7 @@ col1, col2 = st.columns(2)
 with col1:
     if st.button("🔄 Next"):
         st.session_state.current_title, st.session_state.current_paragraph = get_random_wikipedia_page()
-        st.experimental_rerun()
+        st.rerun()
 
 with col2:
     if st.button("💡 Engage More"):
