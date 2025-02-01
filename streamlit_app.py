@@ -13,17 +13,44 @@ wiki_wiki = wikipediaapi.Wikipedia(
     user_agent="snippet (anonymous@example.com)"
 )
 
+# def get_random_wikipedia_page():
+#     """Fetches a random Wikipedia page title and its first paragraph."""
+#     random_titles = ["History of Mathematics", "Quantum Mechanics", "Artificial Intelligence",
+#                      "World War II", "Philosophy", "Ancient Rome", "Computer Science",
+#                      "Space Exploration", "Economics", "Biology", "Psychology"]
+
+#     random_title = random.choice(random_titles)
+#     page = wiki_wiki.page(random_title)
+
+#     if page.exists():
+#         return page.title, page.summary.split(".")[0] + "."  # First sentence only
+#     return None, None
+
 def get_random_wikipedia_page():
-    """Fetches a random Wikipedia page title and its first paragraph."""
-    random_titles = ["History of Mathematics", "Quantum Mechanics", "Artificial Intelligence",
-                     "World War II", "Philosophy", "Ancient Rome", "Computer Science",
-                     "Space Exploration", "Economics", "Biology", "Psychology"]
+    """Fetches a truly random Wikipedia article and returns the first two paragraphs."""
 
-    random_title = random.choice(random_titles)
-    page = wiki_wiki.page(random_title)
+    # Get a truly random Wikipedia article title
+    random_url = "https://en.wikipedia.org/wiki/Special:Random"
+    response = requests.get(random_url, allow_redirects=True)
 
-    if page.exists():
-        return page.title, page.summary.split(".")[0] + "."  # First sentence only
+    if response.status_code == 200:
+        article_title = response.url.split("/wiki/")[-1]
+        page = wiki_wiki.page(article_title)
+
+        if page.exists():
+            # Split text into paragraphs
+            paragraphs = page.text.split("\n")
+
+            # Get at least two non-empty paragraphs
+            selected_paragraphs = []
+            for para in paragraphs:
+                if para.strip():  # Avoid empty lines
+                    selected_paragraphs.append(para)
+                if len(selected_paragraphs) >= 2:  # Stop after two paragraphs
+                    break
+
+            return page.title, "\n\n".join(selected_paragraphs)
+    
     return None, None
 
 def get_ai_insights(paragraph):
