@@ -29,7 +29,8 @@ def get_wikipedia_article(topic):
         "History": "Category:History",
         "Technology": "Category:Technology",
         "Art": "Category:Art",
-        "Politics": "Category:Politics"
+        "Politics": "Category:Politics",
+        "Medicine":"Category:Medicine"
     }
 
     if topic == "Random":
